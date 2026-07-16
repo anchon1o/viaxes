@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  @apply font-body text-charcoal antialiased;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(22,50,79,0.06) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+/* Elemento sinatura: tarxeta tipo "selo de pasaporte" para o diario */
+.stamp-card {
+  background: #fff;
+  border: 1px solid rgba(22,50,79,0.12);
+  position: relative;
+}
+.stamp-card::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1.5px dashed rgba(200,155,60,0.55);
+  pointer-events: none;
+}
+
+/* Liña de ruta debuxada a man no mapa (dasharray animado suave) */
+.route-dash {
+  stroke-dasharray: 1 10;
+  stroke-linecap: round;
+}
+
+::-webkit-scrollbar { height: 8px; width: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(22,50,79,0.25); border-radius: 999px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Foco visible para accesibilidade */
+:focus-visible {
+  outline: 2px solid #007bc4;
+  outline-offset: 2px;
+}
