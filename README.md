@@ -1,7 +1,7 @@
 # 🧭 Viaxes
 
 Aplicación web para planificar viaxes: mapa interactivo, planning por días,
-diario de bitácora (texto/foto/audio/debuxo) e listas (maleta, compra...).
+diario de bitácora (texto/foto/audio/debuxo) e listas (maleta, compra...)
 
 ## 1. Crear o proxecto en Supabase
 
