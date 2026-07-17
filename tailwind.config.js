@@ -1,13 +1,18 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App.jsx'
-import './styles/index.css'
-
-ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </React.StrictMode>,
-)
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './src/**/*.{js,jsx}'],
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        bg:      'var(--color-bg)',
+        surface: 'var(--color-surface)',
+        border:  'var(--color-border)',
+        text:    'var(--color-text)',
+        muted:   'var(--color-muted)',
+        accent:  'var(--color-accent)',
+      },
+    },
+  },
+  plugins: [],
+}
