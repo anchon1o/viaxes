@@ -3,7 +3,7 @@ import { useEffect, useState, createContext, useContext } from 'react'
 import { supabase } from './lib/supabase'
 import { useSettings } from './hooks/useSettings.js'
 import Login         from './pages/Login.jsx'
-import Home          from './pages/Home.jsx'
+import Home from './pages/Home.jsx'
 import TripDashboard from './pages/TripDashboard.jsx'
 import PublicTrip    from './pages/PublicTrip.jsx'
 
