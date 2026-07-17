@@ -4,22 +4,27 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#16324F',      // azul tinta profundo - texto e cabeceiras
-        brand: '#007bc4',    // azul corporativo CMUS - acentos e links
-        paper: '#F6F1E7',    // papel cru - fondo principal
-        paperdark: '#EDE5D3',// papel en sombra - fondo secundario
-        brass: '#C89B3C',    // latón - selos, destacados
-        route: '#3E7C59',    // verde ruta - liñas de traxecto
-        coral: '#E1572C',    // marcador - pins do mapa, alertas suaves
-        charcoal: '#2B2926', // case-negro - texto principal
+        base:    '#ffffff',
+        ink:     '#0a0a0a',
+        mid:     '#737373',
+        line:    '#e5e5e5',
+        soft:    '#f5f5f5',
+        accent:  '#2563eb',
+        danger:  '#ef4444',
       },
       fontFamily: {
-        display: ['"Fraunces"', 'serif'],
-        body: ['"Inter"', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'monospace'],
+        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
+        mono: ['"DM Mono"', 'monospace'],
       },
-      boxShadow: {
-        stamp: '0 2px 0 rgba(43,41,38,0.06), 0 8px 20px -8px rgba(22,50,79,0.25)',
+      fontSize: {
+        xs:  ['11px', '1.5'],
+        sm:  ['13px', '1.5'],
+        base:['15px', '1.6'],
+        lg:  ['17px', '1.4'],
+        xl:  ['20px', '1.3'],
+        '2xl':['24px', '1.2'],
+        '3xl':['30px', '1.15'],
+        '4xl':['38px', '1.1'],
       },
     },
   },
