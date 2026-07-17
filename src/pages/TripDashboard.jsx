@@ -5,102 +5,101 @@ import MapView    from '../components/MapView.jsx'
 import Timeline   from '../components/Timeline.jsx'
 import Diary      from '../components/Diary.jsx'
 import Lists      from '../components/Lists.jsx'
+import SettingsPanel from '../components/SettingsPanel.jsx'
 
 const TABS = [
-  { id: 'mapa',     label: 'Mapa' },
-  { id: 'planning', label: 'Planning' },
-  { id: 'diario',   label: 'Diario' },
-  { id: 'listas',   label: 'Listas' },
+  { id: 'mapa',      icon: '🗺️',  label: 'Mapa' },
+  { id: 'timeline',  icon: '📅',  label: 'Timeline' },
+  { id: 'diario',    icon: '📖',  label: 'Diario' },
+  { id: 'listas',    icon: '✅',  label: 'Listaxes' },
 ]
 
 export default function TripDashboard() {
-  const { tripId } = useParams()
+  const { id: tripId } = useParams()
   const [trip, setTrip]           = useState(null)
   const [tab, setTab]             = useState('mapa')
   const [showInvite, setShowInvite] = useState(false)
+  const [showCfg, setShowCfg]     = useState(false)
   const [inviteUser, setInviteUser] = useState('')
-  const [inviteMsg, setInviteMsg]   = useState('')
+  const [inviteMsg,  setInviteMsg]  = useState('')
 
   useEffect(() => {
     supabase.from('trips').select('*').eq('id', tripId).single().then(({ data }) => setTrip(data))
   }, [tripId])
 
   const handleInvite = async (e) => {
-    e.preventDefault()
-    setInviteMsg('')
-    const { data: userId, error } = await supabase.rpc('get_user_id_by_username', { _username: inviteUser })
-    if (error || !userId) { setInviteMsg('Non se atopou ese usuario.'); return }
-    const { error: ie } = await supabase.from('trip_members').insert({ trip_id: tripId, user_id: userId, role: 'editor' })
-    setInviteMsg(ie ? 'Xa é membro ou houbo un erro.' : 'Convidado!')
+    e.preventDefault(); setInviteMsg('')
+    const { data: uid, error } = await supabase.rpc('get_user_id_by_username', { _username: inviteUser })
+    if (error || !uid) { setInviteMsg('Non se atopou ese usuario.'); return }
+    const { error: ie } = await supabase.from('trip_members').insert({ trip_id: tripId, user_id: uid, role: 'editor' })
+    setInviteMsg(ie ? 'Xa é membro.' : '✓ Convidado!')
     if (!ie) setInviteUser('')
   }
 
   if (!trip) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <span className="text-sm text-mid">Cargando...</span>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-bg)' }}>
+      <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: 'var(--color-accent)', borderTopColor: 'transparent' }} />
     </div>
   )
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg)' }}>
 
       {/* Header */}
-      <header className="border-b border-line px-6 pt-6 pb-0 max-w-5xl mx-auto w-full">
-        <div className="flex items-start justify-between mb-4">
+      <div className="glass sticky top-0 z-30 px-5 pt-10 pb-0">
+        <div className="flex items-start justify-between mb-2">
           <div>
-            <Link to="/" className="text-xs font-mono text-mid hover:text-ink transition-colors">← viaxes</Link>
-            <h1 className="text-2xl font-semibold text-ink mt-1">{trip.name}</h1>
+            <Link to="/" className="text-xs font-medium" style={{ color: 'var(--color-accent)' }}>← Viaxes</Link>
+            <h1 className="text-2xl font-bold mt-0.5" style={{ color: 'var(--color-text)' }}>{trip.name}</h1>
             {trip.start_date && (
-              <p className="text-xs font-mono text-mid mt-0.5">{trip.start_date} → {trip.end_date}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--color-muted)' }}>
+                {trip.start_date} → {trip.end_date}
+              </p>
             )}
           </div>
-          <button
-            onClick={() => setShowInvite(v => !v)}
-            className="text-xs text-mid hover:text-ink transition-colors mt-1"
-          >
-            Convidar
-          </button>
+          <div className="flex gap-2 mt-1">
+            <button onClick={() => setShowInvite(v => !v)}
+              className="w-9 h-9 widget widget-press flex items-center justify-center text-base">👥</button>
+            <button onClick={() => setShowCfg(true)}
+              className="w-9 h-9 widget widget-press flex items-center justify-center text-base">⚙️</button>
+          </div>
         </div>
 
         {showInvite && (
-          <form onSubmit={handleInvite} className="flex gap-2 items-center mb-4 max-w-sm">
-            <input
-              className="input text-sm"
-              placeholder="usuario a convidar"
-              value={inviteUser}
-              onChange={e => setInviteUser(e.target.value)}
-            />
-            <button type="submit" className="btn-primary text-sm">Convidar</button>
-            {inviteMsg && <span className="text-xs text-mid">{inviteMsg}</span>}
+          <form onSubmit={handleInvite} className="flex gap-2 items-center mb-3">
+            <input className="v-input text-sm flex-1" placeholder="usuario a convidar"
+              value={inviteUser} onChange={e => setInviteUser(e.target.value)} autoFocus />
+            <button type="submit" className="v-btn v-btn-primary v-btn-sm">Convidar</button>
+            {inviteMsg && <span className="text-xs" style={{ color: 'var(--color-muted)' }}>{inviteMsg}</span>}
           </form>
         )}
 
-        {/* Tabs */}
-        <nav className="flex gap-0">
+        {/* Tabs top (iPad) / scrollable */}
+        <div className="flex overflow-x-auto gap-0 -mx-1">
           {TABS.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-                tab === t.id
-                  ? 'border-ink text-ink'
-                  : 'border-transparent text-mid hover:text-ink'
-              }`}
-            >
-              {t.label}
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className="flex items-center gap-1.5 px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors"
+              style={{
+                borderColor: tab === t.id ? 'var(--color-accent)' : 'transparent',
+                color: tab === t.id ? 'var(--color-accent)' : 'var(--color-muted)',
+              }}>
+              <span>{t.icon}</span> {t.label}
             </button>
           ))}
-        </nav>
-      </header>
+        </div>
+      </div>
 
       {/* Content */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-6 pt-6 pb-12">
-        {tab === 'mapa'     && <MapView  tripId={tripId} />}
-        {tab === 'planning' && <Timeline tripId={tripId} trip={trip} />}
-        {tab === 'diario'   && <Diary    tripId={tripId} />}
-        {tab === 'listas'   && <Lists    tripId={tripId} />}
+      <main className="flex-1 px-4 pt-4 pb-6 overflow-hidden">
+        <div className="fade-up" key={tab}>
+          {tab === 'mapa'     && <MapView  tripId={tripId} />}
+          {tab === 'timeline' && <Timeline tripId={tripId} trip={trip} />}
+          {tab === 'diario'   && <Diary    tripId={tripId} />}
+          {tab === 'listas'   && <Lists    tripId={tripId} />}
+        </div>
       </main>
 
+      {showCfg && <SettingsPanel onClose={() => setShowCfg(false)} />}
     </div>
   )
 }

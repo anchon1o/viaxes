@@ -2,119 +2,129 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useSession } from '../App.jsx'
+import SettingsPanel from '../components/SettingsPanel.jsx'
+
+const fmtRange = (a, b) => {
+  if (!a) return null
+  const da = new Date(a + 'T00:00:00')
+  const db = b ? new Date(b + 'T00:00:00') : null
+  const opts = { day: 'numeric', month: 'short' }
+  const ya = da.toLocaleDateString('gl', opts)
+  const yb = db ? db.toLocaleDateString('gl', opts) : '?'
+  const nights = db ? Math.round((db - da) / 86400000) : null
+  return { range: `${ya} – ${yb}`, nights }
+}
 
 export default function Trips() {
-  const session   = useSession()
-  const [trips, setTrips]       = useState([])
-  const [loading, setLoading]   = useState(true)
+  const session = useSession()
+  const [trips,    setTrips]    = useState([])
+  const [loading,  setLoading]  = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [showCfg,  setShowCfg]  = useState(false)
   const [name, setName]         = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate]     = useState('')
-  const [saving, setSaving]       = useState(false)
+  const [start, setStart]       = useState('')
+  const [end, setEnd]           = useState('')
+  const [saving, setSaving]     = useState(false)
 
   const load = async () => {
     setLoading(true)
-    const { data } = await supabase.from('trips').select('*').order('start_date', { ascending: true })
+    const { data } = await supabase.from('trips').select('*').order('start_date')
     if (data) setTrips(data)
     setLoading(false)
   }
-
   useEffect(() => { load() }, [])
 
-  const handleCreate = async (e) => {
-    e.preventDefault()
-    setSaving(true)
-    const { data, error } = await supabase
-      .from('trips')
-      .insert({ name, start_date: startDate || null, end_date: endDate || null, created_by: session.user.id })
+  const create = async (e) => {
+    e.preventDefault(); setSaving(true)
+    const { data, error } = await supabase.from('trips')
+      .insert({ name, start_date: start || null, end_date: end || null, created_by: session.user.id })
       .select().single()
     if (!error && data) {
       await supabase.from('trip_members').insert({ trip_id: data.id, user_id: session.user.id, role: 'creator' })
-      setName(''); setStartDate(''); setEndDate(''); setShowForm(false)
-      load()
+      setName(''); setStart(''); setEnd(''); setShowForm(false); load()
     }
     setSaving(false)
   }
 
-  const nights = (a, b) => {
-    if (!a || !b) return null
-    const diff = new Date(b) - new Date(a)
-    return Math.round(diff / 86400000)
-  }
+  const username = session?.user?.email?.split('@')[0] || ''
 
   return (
-    <div className="min-h-screen">
-      <header className="flex items-center justify-between px-6 pt-8 pb-6 max-w-2xl mx-auto">
-        <p className="text-xs font-mono text-mid uppercase tracking-widest">Viaxes</p>
-        <button onClick={() => supabase.auth.signOut()} className="text-xs text-mid hover:text-ink transition-colors">
-          Saír
+    <div className="min-h-screen pb-10" style={{ background: 'var(--color-bg)' }}>
+
+      {/* Header */}
+      <div className="px-5 pt-12 pb-4 flex items-end justify-between">
+        <div>
+          <p className="text-sm" style={{ color: 'var(--color-muted)' }}>Ola, {username} 👋</p>
+          <h1 className="text-3xl font-bold mt-0.5" style={{ color: 'var(--color-text)' }}>As túas viaxes</h1>
+        </div>
+        <button onClick={() => setShowCfg(true)}
+          className="w-10 h-10 widget widget-press flex items-center justify-center text-lg">
+          ⚙️
         </button>
-      </header>
+      </div>
 
-      <main className="max-w-2xl mx-auto px-6 pb-24">
-
+      {/* Lista de viaxes */}
+      <div className="px-5 space-y-3">
         {loading ? (
-          <p className="text-sm text-mid mt-4">Cargando...</p>
-        ) : (
-          <div className="space-y-2">
-            {trips.map((trip) => (
-              <Link
-                key={trip.id}
-                to={`/viaxe/${trip.id}`}
-                className="flex items-center justify-between p-4 rounded-xl border border-line hover:border-ink transition-colors group"
-              >
-                <div>
-                  <p className="font-medium text-ink">{trip.name}</p>
-                  {trip.start_date && (
-                    <p className="text-xs font-mono text-mid mt-0.5">
-                      {trip.start_date} → {trip.end_date}
-                      {nights(trip.start_date, trip.end_date) !== null && (
-                        <span className="ml-2 text-accent">{nights(trip.start_date, trip.end_date)} noites</span>
-                      )}
-                    </p>
-                  )}
-                </div>
-                <span className="text-mid group-hover:text-ink transition-colors text-lg">→</span>
-              </Link>
-            ))}
+          <div className="flex justify-center py-12">
+            <div className="w-6 h-6 rounded-full border-2 border-accent border-t-transparent animate-spin" style={{ borderColor: 'var(--color-accent)', borderTopColor: 'transparent' }} />
           </div>
+        ) : trips.length === 0 && !showForm ? (
+          <div className="widget p-8 text-center fade-up">
+            <div className="text-4xl mb-3">🗺️</div>
+            <p className="font-semibold" style={{ color: 'var(--color-text)' }}>Aínda non hai viaxes</p>
+            <p className="text-sm mt-1 mb-4" style={{ color: 'var(--color-muted)' }}>Crea a primeira e comezade a planificar xuntos</p>
+            <button onClick={() => setShowForm(true)} className="v-btn v-btn-primary v-btn-sm">+ Nova viaxe</button>
+          </div>
+        ) : (
+          trips.map((trip, i) => {
+            const info = fmtRange(trip.start_date, trip.end_date)
+            return (
+              <Link key={trip.id} to={`/viaxe/${trip.id}`}
+                className="widget widget-press block p-5 fade-up"
+                style={{ animationDelay: `${i * 0.05}s` }}>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-lg font-semibold" style={{ color: 'var(--color-text)' }}>{trip.name}</p>
+                    {info && (
+                      <p className="text-sm mt-0.5" style={{ color: 'var(--color-muted)' }}>
+                        {info.range}
+                        {info.nights && <span className="ml-2 pill" style={{ fontSize: 11, padding: '2px 8px' }}>{info.nights}n</span>}
+                      </p>
+                    )}
+                  </div>
+                  <span style={{ color: 'var(--color-accent)', fontSize: 20 }}>›</span>
+                </div>
+              </Link>
+            )
+          })
         )}
 
+        {/* Formulario nova viaxe */}
         {showForm ? (
-          <form onSubmit={handleCreate} className="mt-6 p-5 rounded-xl border border-line space-y-3">
-            <p className="text-sm font-medium text-ink">Nova viaxe</p>
-            <input
-              className="input"
-              placeholder="Nome da viaxe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              autoFocus
-              required
-            />
+          <form onSubmit={create} className="widget p-5 space-y-3 scale-in">
+            <p className="font-semibold" style={{ color: 'var(--color-text)' }}>Nova viaxe</p>
+            <input className="v-input" placeholder="Nome da viaxe" value={name}
+              onChange={e => setName(e.target.value)} autoFocus required />
             <div className="flex gap-2">
-              <input type="date" className="input font-mono text-sm" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-              <input type="date" className="input font-mono text-sm" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+              <input type="date" className="v-input text-sm" value={start} onChange={e => setStart(e.target.value)} />
+              <input type="date" className="v-input text-sm" value={end}   onChange={e => setEnd(e.target.value)} />
             </div>
             <div className="flex gap-2">
-              <button type="submit" disabled={saving} className="btn-primary flex-1">
-                {saving ? 'Creando...' : 'Crear'}
-              </button>
-              <button type="button" onClick={() => setShowForm(false)} className="btn-ghost">
-                Cancelar
-              </button>
+              <button type="submit" disabled={saving} className="v-btn v-btn-primary flex-1">{saving ? 'Creando...' : 'Crear'}</button>
+              <button type="button" onClick={() => setShowForm(false)} className="v-btn v-btn-secondary">Cancelar</button>
             </div>
           </form>
-        ) : (
-          <button
-            onClick={() => setShowForm(true)}
-            className="mt-4 w-full p-4 rounded-xl border border-dashed border-line text-sm text-mid hover:text-ink hover:border-ink transition-colors text-left"
-          >
+        ) : trips.length > 0 && (
+          <button onClick={() => setShowForm(true)}
+            className="w-full py-4 rounded-2xl text-sm font-medium transition-colors"
+            style={{ border: '1.5px dashed var(--color-border)', color: 'var(--color-muted)' }}>
             + Nova viaxe
           </button>
         )}
+      </div>
 
-      </main>
+      {showCfg && <SettingsPanel onClose={() => setShowCfg(false)} />}
     </div>
   )
 }

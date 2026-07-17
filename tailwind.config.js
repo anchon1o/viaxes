@@ -1,30 +1,34 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{js,jsx}'],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        base:    '#ffffff',
-        ink:     '#0a0a0a',
-        mid:     '#737373',
-        line:    '#e5e5e5',
-        soft:    '#f5f5f5',
-        accent:  '#2563eb',
-        danger:  '#ef4444',
+        // CSS variables — cambian según tema/acento del usuario
+        bg:        'var(--color-bg)',
+        surface:   'var(--color-surface)',
+        border:    'var(--color-border)',
+        text:      'var(--color-text)',
+        muted:     'var(--color-muted)',
+        accent:    'var(--color-accent)',
+        accentFg:  'var(--color-accent-fg)',
       },
       fontFamily: {
-        sans: ['"DM Sans"', 'system-ui', 'sans-serif'],
-        mono: ['"DM Mono"', 'monospace'],
+        inter:     ['"Inter"', 'system-ui', 'sans-serif'],
+        fraunces:  ['"Fraunces"', 'Georgia', 'serif'],
+        dm:        ['"DM Sans"', 'system-ui', 'sans-serif'],
+        mono:      ['"JetBrains Mono"', 'monospace'],
       },
-      fontSize: {
-        xs:  ['11px', '1.5'],
-        sm:  ['13px', '1.5'],
-        base:['15px', '1.6'],
-        lg:  ['17px', '1.4'],
-        xl:  ['20px', '1.3'],
-        '2xl':['24px', '1.2'],
-        '3xl':['30px', '1.15'],
-        '4xl':['38px', '1.1'],
+      backdropBlur: { xs: '4px' },
+      borderRadius: {
+        '2xl': '16px',
+        '3xl': '24px',
+      },
+      boxShadow: {
+        widget: '0 2px 20px -4px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.06)',
+        'widget-dark': '0 2px 20px -4px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.06)',
+        float: '0 8px 32px -8px rgba(0,0,0,0.2)',
       },
     },
   },

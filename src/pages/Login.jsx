@@ -2,65 +2,44 @@ import { useState } from 'react'
 import { supabase, usernameToEmail } from '../lib/supabase'
 
 export default function Login() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError]       = useState('')
-  const [loading, setLoading]   = useState(false)
+  const [user, setUser]   = useState('')
+  const [pass, setPass]   = useState('')
+  const [err, setErr]     = useState('')
+  const [busy, setBusy]   = useState(false)
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({
-      email: usernameToEmail(username),
-      password,
-    })
-    setLoading(false)
-    if (error) setError('Usuario ou contrasinal incorrectos.')
+  const submit = async (e) => {
+    e.preventDefault(); setErr(''); setBusy(true)
+    const { error } = await supabase.auth.signInWithPassword({ email: usernameToEmail(user), password: pass })
+    setBusy(false)
+    if (error) setErr('Usuario ou contrasinal incorrectos.')
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6">
-      <div className="w-full max-w-[340px]">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 fade-up"
+         style={{ background: 'var(--color-bg)' }}>
 
-        {/* Logotipo */}
-        <div className="mb-10">
-          <p className="text-xs font-mono text-mid uppercase tracking-widest mb-2">Viaxes</p>
-          <h1 className="text-3xl font-semibold text-ink leading-tight">
-            Benvidos<br />de volta.
-          </h1>
+      {/* Icono da app */}
+      <div className="mb-8 text-center">
+        <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-4 mx-auto shadow-widget"
+             style={{ background: 'var(--color-accent)' }}>
+          🧭
         </div>
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            className="input"
-            type="text"
-            placeholder="Usuario"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoCapitalize="none"
-            autoCorrect="off"
-            required
-          />
-          <input
-            className="input"
-            type="password"
-            placeholder="Contrasinal"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-
-          {error && (
-            <p className="text-xs text-danger">{error}</p>
-          )}
-
-          <button type="submit" disabled={loading} className="btn-primary w-full mt-1">
-            {loading ? 'Entrando...' : 'Entrar'}
-          </button>
-        </form>
-
+        <h1 className="text-3xl font-bold" style={{ color: 'var(--color-text)' }}>Viaxes</h1>
+        <p className="text-sm mt-1" style={{ color: 'var(--color-muted)' }}>O voso caderno de viaxe compartido</p>
       </div>
+
+      {/* Form */}
+      <form onSubmit={submit} className="widget w-full max-w-sm p-6 space-y-3 scale-in">
+        <input className="v-input" type="text" placeholder="Usuario" value={user}
+          onChange={e => setUser(e.target.value)} autoCapitalize="none" autoCorrect="off" required />
+        <input className="v-input" type="password" placeholder="Contrasinal" value={pass}
+          onChange={e => setPass(e.target.value)} required />
+        {err && <p className="text-sm text-center" style={{ color: '#FF3B30' }}>{err}</p>}
+        <button type="submit" disabled={busy} className="v-btn v-btn-primary w-full mt-2">
+          {busy ? 'Entrando...' : 'Entrar'}
+        </button>
+      </form>
+
     </div>
   )
 }
