@@ -3,7 +3,7 @@
 Aplicación web para planificar viaxes: mapa interactivo, planning por días,
 diario de bitácora (texto/foto/audio/debuxo) e listas (maleta, compra...). 100% gratuíta.
 
-## 1. Crear o proxecto en Supabase (gratis)
+## 1. Crear o proxecto en Supabase
 
 1. Vai a [supabase.com](https://supabase.com) → **New project** (rexión Frankfurt recomendada).
 2. Cando estea listo, entra en **SQL Editor** → pega **todo** o contido de `sql/schema.sql` → **Run**.
